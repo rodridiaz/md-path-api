@@ -55,7 +55,7 @@ export function getGamesMonthData(
       .slice(0, 10);
 
     gamesMonthData.top = topGamesInCurrentDate;
-    gamesMonthData.topListHistory = mergeGamesLists(gamesMonthData.topListHistory, gamesMonthData.top);
+    gamesMonthData.topListHistory = mergeGamesLists(gamesMonthData.topListHistory, gamesMonthData.top).sort((a: { originalScore: number }, b: { originalScore: number }) => b.originalScore - a.originalScore);
 
     const updatedGamesInCurrentPeriod = applyWearPoints(wearPoints, topGamesInCurrentDate);
 

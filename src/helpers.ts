@@ -1,4 +1,3 @@
-import { isBefore, isFirstDayOfMonth, sub } from "date-fns";
 import { Game } from "./scrapGames";
 
 const fs = require("fs");
@@ -12,7 +11,7 @@ export function writeGamesToCSV(gameList: Game[] | null, filename: string, heade
   writeStream.write(`${headerCommaSeparated}\n`);
   gameList.forEach((game: Game) => {
     writeStream.write(
-      `${Number(game.score).toFixed(2)},${game.title},${game.reviewsCount},${game.link},${game.releaseDate}\n`,
+      `${Number(game.score).toFixed(2)},${Number(game.originalScore).toFixed(2)},${game.title},${game.reviewsCount},${game.link},${game.releaseDate}\n`,
       (error: any) => {
         if (error) {
           return console.log(error);
@@ -104,20 +103,6 @@ export function getMDPathDatesBetweenTwoDates(beforeDate: string | number | Date
     count++;
   }
   return dateList;
-}
-
-export function groupEarlyGamesByDate(gameList: Game[], untilDate: string) {
-  if (!isFirstDayOfMonth(new Date(untilDate))) {
-    throw Error("Error grouping early games: Until date need to be a first day of month Date");
-  }
-  const adjustedEarlyGames = gameList
-    .filter((game) => isBefore(new Date(game.releaseDate as string), new Date(untilDate)))
-    .map((game) => ({
-      ...game,
-      releaseDate: formatISO(sub(new Date(untilDate), { months: 1 }), { representation: "date" }),
-    }));
-
-  return mergeGamesLists(gameList, adjustedEarlyGames);
 }
 
 export function hasReleaseDateByCountryCode(countryCode: string, releaseCountry: string) {

@@ -4,7 +4,6 @@ import * as cheerio from "cheerio";
 import { closestTo, formatISO, isValid } from "date-fns";
 import {
   normalizeDateToISO,
-  groupEarlyGamesByDate,
   isOnlyYearDate,
   writeGamesToCSV,
   writeGamesToJSON,
@@ -16,14 +15,14 @@ const progressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_cla
 export async function scrapSegaRetro(fileHeader: string) {
   const gameList = await getParsedGames();
   const gamesWithReleaseDates = await getGamesWithYears(gameList);
-  const finalGameList = groupEarlyGamesByDate(gamesWithReleaseDates, "1989-12-01");
-  writeGamesToCSV(finalGameList, `MDPathGames`, fileHeader);
-  writeGamesToJSON(finalGameList, `MDPathGames`);
+  writeGamesToCSV(gamesWithReleaseDates, `MDPathGames`, fileHeader);
+  writeGamesToJSON(gamesWithReleaseDates, `MDPathGames`);
 }
 
 export interface Game {
+  id: number;
   score: number;
-  originalScore: number
+  originalScore: number;
   title: string;
   reviewsCount: number;
   link: string;
@@ -36,13 +35,14 @@ async function getParsedGames() {
     const res = await axios.get("https://segaretro.org/Mega_Drive_game_ratings");
     const $ = cheerio.load(res.data);
 
-    $(".prettytable tbody tr").each((_, DOMGame) => {
+    $(".prettytable tbody tr").each((i, DOMGame) => {
       const score = getGameScore($(DOMGame));
       const title = getGameTitle($(DOMGame));
       const reviewsCount = getGameReviewsCount($(DOMGame));
       const link = getGameLink($(DOMGame));
       if (link) {
         gamesArray.push({
+          id: i,
           score,
           originalScore: score,
           title,
